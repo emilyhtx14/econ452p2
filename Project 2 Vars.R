@@ -12,6 +12,7 @@ library(plm)
 library(stargazer)
 
 # Immigration attitude variables
+# Want to make these into an index: a single variable denoting attitude towards immigrants
 
 table(ivs$A124_06)
 attributes(ivs$A124_06)
