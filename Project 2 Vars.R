@@ -44,7 +44,8 @@ table(ivs$G052)
 attributes(ivs$G052)
 # Increasing in positive impact immigrants have on country
 
-# Demographics
+###
+# Explanatory Variables
 
 table(ivs$G026)
 # 1 = mother is immigrant
