@@ -72,39 +72,52 @@ attributes(ivs$C006)
 
 # Select the desired columns from the 'ivs' data
 ivsSmall <- ivs[,c("S003", "S020", "A124_06","C002","E143","G038","G040", "G041", "G052")]
-colnames(ivsSmall)<-c("code", "year","nbr","jobPri","policy","lessJobs","crime", "lessWelfare", "posImpact")
+colnames(ivsSmall)<-c("code", "year","nbr","jobPri","policy","lessJobs","crime", "welfareStrain", "posImpact")
 
-# Set negative values in 'ivs2' to NA
+# Remap variables to increase with pro-immigration attitudes
+
+# 0 do not want immigrants as neighbors
+ivsSmall <- ivsSmall %>% mutate(nbr = case_match(nbr, 1~0))
+
+# 0 = citizens should have job priority over immigrants
+# 1 = no job priority
+# 0.5 = no opinion
+ivsSmall <- ivsSmall %>% mutate(jobPri = case_match(nbr, 1~0, 2~1, 3~0.5))
+
+ivsSmall <- ivsSmall %>% mutate(policy = case_match(nbr, 1~1, 2~0.66, 3~0.33, 4~0))
+
+# adjust scale to be max 1
+ivsSmall <- ivsSmall %>% mutate(lessJobs = case_match(lessJobs, 1~0, 2~0.1, 3~0.2, 4~0.3, 5~0.4, 6~0.5, 7~0.6, 8~0.7, 9~0.8, 10~1))
+ivsSmall <- ivsSmall %>% mutate(crime = case_match(crime, 1~0, 2~0.1, 3~0.2, 4~0.3, 5~0.4, 6~0.5, 7~0.6, 8~0.7, 9~0.8, 10~1))
+ivsSmall <- ivsSmall %>% mutate(welfareStrain = case_match(welfareStrain, 1~0, 2~0.1, 3~0.2, 4~0.3, 5~0.4, 6~0.5, 7~0.6, 8~0.7, 9~0.8, 10~1))
+ivsSmall <- ivsSmall %>% mutate(posImpact = case_match(posImpact, 1~0, 2~0.4, 3~0.6, 4~0.8, 5~1))
+
+# Set negative values in 'ivsSmall' to NA
 ivsSmall[ivsSmall<0]<-NA
 
 # Convert 'code' to 3-digit country codes using countrycode
 ivsSmall$code <- countrycode(ivsSmall$code, "iso3n", "iso3c")
 
-# choose not to include those who are indifferent to having immigrants as nbrs
-# ivsSmall$nbr[ivsSmall$nbr == 3] <- NA
-
-# Convert 'nbr' to numeric variable indicating that they want immigrants as neighbors (1) or not (0)
-# ivsSmall$nbr <- as.numeric(ivsSmall$nbr == 1)
-
 # Convert 'year' to numeric variable
 ivsSmall$year <- as.numeric(ivsSmall$year)
 
-countryImmData <- ivsSmall %>% group_by(year, code) %>% 
+# this represents an index of immigration attitudes
+countryImmViews <- ivsSmall %>% group_by(year, code) %>% 
   summarise(nbr = mean(nbr, na.rm = TRUE),
             jobPri = mean(jobPri, na.rm = TRUE),
             policy = mean(policy, na.rm = TRUE),
             lessJobs = mean(lessJobs, na.rm = TRUE),
             crime = mean(crime, na.rm = TRUE),
-            lessWelfare = mean(lessWelfare, na.rm = TRUE),
+            welfareStrain = mean(welfareStrain, na.rm = TRUE),
             posImpact = mean(posImpact, na.rm = TRUE),
   )
 
 # Replace "NaN" values with NA in 'countrydata'
-countryImmData[countryImmData == "NaN"] <- NA
+countryImmViews[countryImmViews == "NaN"] <- NA
 
-length(unique(countryImmData$code))
+length(unique(countryImmViews$code))
 
 macrodata<-readRDS("macrodata.RDS")
 
-countryImmData <- merge(countryImmData, macrodata)
+countryImmViews <- merge(countryImmViews, macrodata)
 
