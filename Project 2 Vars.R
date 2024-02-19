@@ -91,8 +91,8 @@ ivsSmall$year <- as.numeric(ivsSmall$year)
 
 countrydata <- ivsSmall %>% group_by(year, code) %>% 
   summarise(attend = mean(nbr, na.rm = TRUE),
-            hell = mean(jobPri, na.rm = TRUE),
-            work = mean(policy, na.rm = TRUE),
+            jobPri = mean(jobPri, na.rm = TRUE),
+            policy = mean(policy, na.rm = TRUE),
             lessJobs = mean(lessJobs, na.rm = TRUE),
             crime = mean(crime, na.rm = TRUE),
             lessWelfare = mean(lessWelfare, na.rm = TRUE),
