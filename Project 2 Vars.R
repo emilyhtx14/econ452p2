@@ -31,7 +31,7 @@ attributes(ivs$E143)
 # Increasing in strictness of immigration policy
 
 table(ivs$G038)
-attributes(ivs$G038)
+attr(ivs$G038, "labels")
 # Increasing in disagreement: "immigrants take away jobs"
 
 table(ivs$G040)
@@ -84,7 +84,7 @@ ivsSmall <- ivsSmall %>% mutate(nbr = case_match(nbr, 1~0))
 # 0.5 = no opinion
 ivsSmall <- ivsSmall %>% mutate(jobPri = case_match(nbr, 1~0, 2~1, 3~0.5))
 
-ivsSmall <- ivsSmall %>% mutate(policy = case_match(nbr, 1~1, 2~0.66, 3~0.33, 4~0))
+ivsSmall <- ivsSmall %>% mutate(policy = case_match(policy, 1~1, 2~0.66, 3~0.33, 4~0))
 
 # adjust scale to be max 1
 ivsSmall <- ivsSmall %>% mutate(lessJobs = case_match(lessJobs, 1~0, 2~0.1, 3~0.2, 4~0.3, 5~0.4, 6~0.5, 7~0.6, 8~0.7, 9~0.8, 10~1))
@@ -100,6 +100,7 @@ ivsSmall$code <- countrycode(ivsSmall$code, "iso3n", "iso3c")
 
 # Convert 'year' to numeric variable
 ivsSmall$year <- as.numeric(ivsSmall$year)
+table(ivsSmall$year)
 
 # this represents an index of immigration attitudes
 countryImmViews <- ivsSmall %>% group_by(year, code) %>% 
@@ -120,4 +121,7 @@ length(unique(countryImmViews$code))
 macrodata<-readRDS("macrodata.RDS")
 
 countryImmViews <- merge(countryImmViews, macrodata)
+
+countryImmViews <- pdata.frame(countryImmViews, index = c("code", "year"))
+
 
