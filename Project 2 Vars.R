@@ -1,6 +1,5 @@
-setwd("~/Desktop/REE")
-IVSvars <- readRDS("IVS_names_years.RDS")
-ivs <- readRDS("ivs.RDS")
+setwd("/Users/emilyhuang/econ452/econ452p2/")
+# setwd("~/Desktop/REE")
 
 library(haven)
 library(sjlabelled)
@@ -10,6 +9,9 @@ library(ggplot2)
 library(ggthemes)
 library(plm)
 library(stargazer)
+
+IVSvars <- readRDS("IVS_names_years.RDS")
+ivs <- readRDS("ivs.RDS")
 
 # Immigration attitude variables
 # Want to make these into an index: a single variable denoting attitude towards immigrants
@@ -67,3 +69,41 @@ attributes(ivs$F034)
 
 attributes(ivs$C006)
 # increasing in satisfaction with household's financial situation
+
+# Select the desired columns from the 'ivs' data
+ivsSmall <- ivs[,c("S003", "S020", "A124_06","C002","E143","G038","G040", "G041", "G052")]
+colnames(ivsSmall)<-c("code", "year","nbr","jobPri","policy","lessJobs","crime", "lessWelfare", "posImpact")
+
+# Set negative values in 'ivs2' to NA
+ivsSmall[ivsSmall<0]<-NA
+
+# Convert 'code' to 3-digit country codes using countrycode
+ivsSmall$code <- countrycode(ivsSmall$code, "iso3n", "iso3c")
+
+# choose not to include those who are indifferent to having immigrants as nbrs
+# ivsSmall$nbr[ivsSmall$nbr == 3] <- NA
+
+# Convert 'nbr' to numeric variable indicating that they want immigrants as neighbors (1) or not (0)
+# ivsSmall$nbr <- as.numeric(ivsSmall$nbr == 1)
+
+# Convert 'year' to numeric variable
+ivsSmall$year <- as.numeric(ivsSmall$year)
+
+countrydata <- ivsSmall %>% group_by(year, code) %>% 
+  summarise(attend = mean(nbr, na.rm = TRUE),
+            hell = mean(jobPri, na.rm = TRUE),
+            work = mean(policy, na.rm = TRUE),
+            lessJobs = mean(lessJobs, na.rm = TRUE),
+            crime = mean(crime, na.rm = TRUE),
+            lessWelfare = mean(lessWelfare, na.rm = TRUE),
+            posImpact = mean(posImpact, na.rm = TRUE),
+  )
+
+# Replace "NaN" values with NA in 'countrydata'
+countrydata[countrydata == "NaN"] <- NA
+
+length(unique(countrydata$code))
+
+macrodata<-readRDS("macrodata.RDS")
+
+countrydata <- merge(countrydata, macrodata)
