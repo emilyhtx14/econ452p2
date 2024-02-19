@@ -90,7 +90,7 @@ ivsSmall$code <- countrycode(ivsSmall$code, "iso3n", "iso3c")
 ivsSmall$year <- as.numeric(ivsSmall$year)
 
 countrydata <- ivsSmall %>% group_by(year, code) %>% 
-  summarise(attend = mean(nbr, na.rm = TRUE),
+  summarise(nbr = mean(nbr, na.rm = TRUE),
             jobPri = mean(jobPri, na.rm = TRUE),
             policy = mean(policy, na.rm = TRUE),
             lessJobs = mean(lessJobs, na.rm = TRUE),
