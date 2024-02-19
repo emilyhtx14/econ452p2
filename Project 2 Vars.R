@@ -89,7 +89,7 @@ ivsSmall$code <- countrycode(ivsSmall$code, "iso3n", "iso3c")
 # Convert 'year' to numeric variable
 ivsSmall$year <- as.numeric(ivsSmall$year)
 
-countrydata <- ivsSmall %>% group_by(year, code) %>% 
+countryImmData <- ivsSmall %>% group_by(year, code) %>% 
   summarise(nbr = mean(nbr, na.rm = TRUE),
             jobPri = mean(jobPri, na.rm = TRUE),
             policy = mean(policy, na.rm = TRUE),
@@ -100,10 +100,11 @@ countrydata <- ivsSmall %>% group_by(year, code) %>%
   )
 
 # Replace "NaN" values with NA in 'countrydata'
-countrydata[countrydata == "NaN"] <- NA
+countryImmData[countryImmData == "NaN"] <- NA
 
-length(unique(countrydata$code))
+length(unique(countryImmData$code))
 
 macrodata<-readRDS("macrodata.RDS")
 
-countrydata <- merge(countrydata, macrodata)
+countryImmData <- merge(countryImmData, macrodata)
+
