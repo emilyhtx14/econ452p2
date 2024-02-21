@@ -47,6 +47,7 @@ attributes(ivs$G052)
 
 ###
 # Explanatory Variables
+# include country fixed effects
 
 table(ivs$G026)
 # 1 = mother is immigrant
@@ -57,9 +58,15 @@ table(ivs$G027)
 table(ivs$G027A)
 # 1 = respondent is immigrant
 
+attributes(ivs$X025)
+# education
+
+attributes(ivs$X001)
+# sex
+
 attributes(ivs$F028)
 table(ivs$F028)
-# attendance -- needs to be converted
+# attendance (converted in ivsSmall)
 
 attributes(ivs$F025)
 # religion
