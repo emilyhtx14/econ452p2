@@ -1,4 +1,4 @@
-setwd("~/Desktop/REE")
+#setwd("~/Desktop/REE")
 
 library(haven)
 library(sjlabelled)
@@ -57,21 +57,37 @@ table(ivs$G027)
 table(ivs$G027A)
 # 1 = respondent is immigrant
 
-get_labels(ivs$F028)
+attributes(ivs$F028)
+table(ivs$F028)
 # attendance -- needs to be converted
 
 attributes(ivs$F025)
 # religion
 
 attributes(ivs$F034)
+table(ivs$F034)
 # religious person
 
 attributes(ivs$C006)
 # increasing in satisfaction with household's financial situation
 
 # Select the desired columns from the 'ivs' data
-ivsSmall <- ivs[,c("S003", "S020", "A124_06","C002","E143","G038","G040", "G041", "G052")]
-colnames(ivsSmall)<-c("code", "year","nbr","jobPri","policy","lessJobs","crime", "welfareStrain", "posImpact")
+ivsSmall <- ivs[,c("S003", "S020", "A124_06","C002","E143","G038","G040", "G041", "G052", "F034", "F028", "C006")]
+colnames(ivsSmall)<-c("code", "year","nbr","jobPri","policy","lessJobs","crime", "welfareStrain", "posImpact", "reliPerson", "attend", "satisfied")
+
+# religious person variable
+ivsSmall$binaryReliPerson <- ifelse(ivsSmall$reliPerson == 1, 1, 0)
+
+# attend
+ivsSmall <- ivsSmall %>% mutate(attend = case_match(attend,
+                                            1~100,
+                                            2~52,
+                                            3~12,
+                                            4~4,
+                                            5~2,
+                                            6~1,
+                                            7~0.5,
+                                            8~0))
 
 # Remap variables to increase with pro-immigration attitudes
 
@@ -114,6 +130,9 @@ countryImmViews <- ivsSmall %>% group_by(code) %>%
             crime = mean(crime, na.rm = TRUE),
             welfareStrain = mean(welfareStrain, na.rm = TRUE),
             posImpact = mean(posImpact, na.rm = TRUE),
+            binaryReliPerson = mean(binaryReliPerson, na.rm = TRUE),
+            attend = mean(attend, na.rm = TRUE),
+            satisfied = mean(satisfied, na.rm = TRUE)
   )
 
 countryImmViews <- countryImmViews %>%
@@ -127,17 +146,38 @@ length(unique(countryImmViews$code))
 macrodata<-readRDS("macrodata.RDS")
 
 countryImmViews <- merge(countryImmViews, macrodata)
+countryImmViews2022 <- countryImmViews[countryImmViews$year == 2022, ]
 
 theme_set(theme_tufte())
 
-ggplot(countryImmViews2, aes(x = code, y = overallAttitude, label=code)) +
+# Overall Attitude by country
+ggplot(countryImmViews2022, aes(x = code, y = overallAttitude, label=code)) +
   theme(axis.ticks.x=element_blank(),axis.text.x=element_blank())+
-  geom_point(col="blue",alpha=0.5)+geom_text(hjust=-0.1,vjust=-0.1)
-# Right now this plot contains all years of observation for each country
-# with one mean overall Attitude value and just plots them on top of each other
-# doesn't really mess with things visually but IDK how to fix it
+  geom_point(col="blue",alpha=0.5)+geom_text(hjust=-0.1,vjust=-0.1)+
+  labs(y = "Overall Attitude", x = "")
 
-# want to plot at country level: attitudes vs. GDP, "religious person" var,
-# attendance, financial satisfaction
+# attitude vs. log gdp per capita
+ggplot(countryImmViews2022, aes(x = lgdppc, y = overallAttitude, label=code)) +
+  geom_point(col="blue",alpha=0.5)+geom_text(hjust=-0.1,vjust=-0.1)+
+  labs(x = "Log GDP per Capita", y = "Overall Attitude")+
+  geom_smooth(method = "lm")
+
+# religious person
+ggplot(countryImmViews2022, aes(x = binaryReliPerson, y = overallAttitude, label=code)) +
+  geom_point(col="blue",alpha=0.5)+geom_text(hjust=-0.1,vjust=-0.1)+
+  labs(x = '% IDing as "religious person"', y = "Overall Attitude")+
+  geom_smooth(method = "lm")
+
+# attend
+ggplot(countryImmViews2022, aes(x = attend, y = overallAttitude, label=code)) +
+  geom_point(col="blue",alpha=0.5)+geom_text(hjust=-0.1,vjust=-0.1)+
+  labs(x = 'Religious Attendance', y = "Overall Attitude")+
+  geom_smooth(method = "lm")
+
+# satisfied
+ggplot(countryImmViews2022, aes(x = satisfied, y = overallAttitude, label=code)) +
+  geom_point(col="blue",alpha=0.5)+geom_text(hjust=-0.1,vjust=-0.1)+
+  labs(x = 'Satisfaction with Financial Situation', y = "Overall Attitude")+
+  geom_smooth(method = "lm")
 
 countryImmViews <- pdata.frame(countryImmViews, index = c("code", "year"))
