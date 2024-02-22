@@ -1,5 +1,3 @@
-#setwd("~/Desktop/REE")
-
 library(haven)
 library(sjlabelled)
 library(dplyr)
@@ -47,7 +45,6 @@ attributes(ivs$G052)
 
 ###
 # Explanatory Variables
-# include country fixed effects
 
 table(ivs$G026)
 # 1 = mother is immigrant
@@ -58,15 +55,9 @@ table(ivs$G027)
 table(ivs$G027A)
 # 1 = respondent is immigrant
 
-attributes(ivs$X025)
-# education
-
-attributes(ivs$X001)
-# sex
-
 attributes(ivs$F028)
 table(ivs$F028)
-# attendance (converted in ivsSmall)
+# attendance -- needs to be converted
 
 attributes(ivs$F025)
 # religion
@@ -75,12 +66,15 @@ attributes(ivs$F034)
 table(ivs$F034)
 # religious person
 
+table(ivs$unemployed)
+ivs$unemployed <- ifelse(ivs$X028 == 7, 1, 0)
+
 attributes(ivs$C006)
 # increasing in satisfaction with household's financial situation
 
 # Select the desired columns from the 'ivs' data
-ivsSmall <- ivs[,c("S003", "S020", "A124_06","C002","E143","G038","G040", "G041", "G052", "F034", "F028", "C006")]
-colnames(ivsSmall)<-c("code", "year","nbr","jobPri","policy","lessJobs","crime", "welfareStrain", "posImpact", "reliPerson", "attend", "satisfied")
+ivsSmall <- ivs[,c("S003", "S020", "A124_06","C002","E143","G038","G040", "G041", "G052", "F034", "F028", "C006", "unemployed")]
+colnames(ivsSmall)<-c("code", "year","nbr","jobPri","policy","lessJobs","crime", "welfareStrain", "posImpact", "reliPerson", "attend", "satisfied", "unemployed")
 
 # religious person variable
 ivsSmall$binaryReliPerson <- ifelse(ivsSmall$reliPerson == 1, 1, 0)
@@ -139,7 +133,8 @@ countryImmViews <- ivsSmall %>% group_by(code) %>%
             posImpact = mean(posImpact, na.rm = TRUE),
             binaryReliPerson = mean(binaryReliPerson, na.rm = TRUE),
             attend = mean(attend, na.rm = TRUE),
-            satisfied = mean(satisfied, na.rm = TRUE)
+            satisfied = mean(satisfied, na.rm = TRUE),
+            unemployed = mean(unemployed, na.rm = TRUE)
   )
 
 countryImmViews <- countryImmViews %>%
@@ -185,6 +180,12 @@ ggplot(countryImmViews2022, aes(x = attend, y = overallAttitude, label=code)) +
 ggplot(countryImmViews2022, aes(x = satisfied, y = overallAttitude, label=code)) +
   geom_point(col="blue",alpha=0.5)+geom_text(hjust=-0.1,vjust=-0.1)+
   labs(x = 'Satisfaction with Financial Situation', y = "Overall Attitude")+
+  geom_smooth(method = "lm")
+
+# unemployed
+ggplot(countryImmViews2022, aes(x = unemployed, y = overallAttitude, label=code)) +
+  geom_point(col="blue",alpha=0.5)+geom_text(hjust=-0.1,vjust=-0.1)+
+  labs(x = 'Unemployed', y = "Overall Attitude")+
   geom_smooth(method = "lm")
 
 countryImmViews <- pdata.frame(countryImmViews, index = c("code", "year"))
