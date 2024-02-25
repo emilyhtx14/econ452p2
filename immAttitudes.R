@@ -123,7 +123,7 @@ table(ivsSmall$year)
 
 # this represents an index of immigration attitudes
 
-countryImmViews <- ivsSmall %>% group_by(code) %>% 
+countryData <- ivsSmall %>% group_by(code) %>% 
   summarise(nbr = mean(nbr, na.rm = TRUE),
             jobPri = mean(jobPri, na.rm = TRUE),
             policy = mean(policy, na.rm = TRUE),
@@ -137,53 +137,53 @@ countryImmViews <- ivsSmall %>% group_by(code) %>%
             unemployed = mean(unemployed, na.rm = TRUE)
   )
 
-countryImmViews <- countryImmViews %>%
+countryData <- countryData %>%
   mutate(overallAttitude = rowMeans(select(., nbr, jobPri, policy, lessJobs, crime, welfareStrain, posImpact), na.rm = TRUE))
 
 # Replace "NaN" values with NA in 'countrydata'
-countryImmViews[countryImmViews == "NaN"] <- NA
+countryData[countryData == "NaN"] <- NA
 
-length(unique(countryImmViews$code))
+length(unique(countryData$code))
 
 macrodata<-readRDS("macrodata.RDS")
 
-countryImmViews <- merge(countryImmViews, macrodata)
-countryImmViews2022 <- countryImmViews[countryImmViews$year == 2022, ]
+countryData <- merge(countryData, macrodata)
+countryData2022 <- countryData[countryData$year == 2022, ]
 
 theme_set(theme_tufte())
 
 # Overall Attitude by country
-ggplot(countryImmViews2022, aes(x = code, y = overallAttitude, label=code)) +
+ggplot(countryData2022, aes(x = code, y = overallAttitude, label=code)) +
   theme(axis.ticks.x=element_blank(),axis.text.x=element_blank())+
   geom_point(col="blue",alpha=0.5)+geom_text(hjust=-0.1,vjust=-0.1)+
   labs(y = "Overall Attitude", x = "")
 
 # attitude vs. log gdp per capita
-ggplot(countryImmViews2022, aes(x = lgdppc, y = overallAttitude, label=code)) +
+ggplot(countryData2022, aes(x = lgdppc, y = overallAttitude, label=code)) +
   geom_point(col="blue",alpha=0.5)+geom_text(hjust=-0.1,vjust=-0.1)+
   labs(x = "Log GDP per Capita", y = "Overall Attitude")+
   geom_smooth(method = "lm")
 
 # religious person
-ggplot(countryImmViews2022, aes(x = binaryReliPerson, y = overallAttitude, label=code)) +
+ggplot(countryData2022, aes(x = binaryReliPerson, y = overallAttitude, label=code)) +
   geom_point(col="blue",alpha=0.5)+geom_text(hjust=-0.1,vjust=-0.1)+
   labs(x = '% IDing as "religious person"', y = "Overall Attitude")+
   geom_smooth(method = "lm")
 
 # attend
-ggplot(countryImmViews2022, aes(x = attend, y = overallAttitude, label=code)) +
+ggplot(countryData2022, aes(x = attend, y = overallAttitude, label=code)) +
   geom_point(col="blue",alpha=0.5)+geom_text(hjust=-0.1,vjust=-0.1)+
   labs(x = 'Religious Attendance', y = "Overall Attitude")+
   geom_smooth(method = "lm")
 
 # satisfied
-ggplot(countryImmViews2022, aes(x = satisfied, y = overallAttitude, label=code)) +
+ggplot(countryData2022, aes(x = satisfied, y = overallAttitude, label=code)) +
   geom_point(col="blue",alpha=0.5)+geom_text(hjust=-0.1,vjust=-0.1)+
   labs(x = 'Satisfaction with Financial Situation', y = "Overall Attitude")+
   geom_smooth(method = "lm")
 
 # unemployed
-ggplot(countryImmViews2022, aes(x = unemployed, y = overallAttitude, label=code)) +
+ggplot(countryData2022, aes(x = unemployed, y = overallAttitude, label=code)) +
   geom_point(col="blue",alpha=0.5)+geom_text(hjust=-0.1,vjust=-0.1)+
   labs(x = 'Unemployed', y = "Overall Attitude")+
   geom_smooth(method = "lm")
@@ -193,43 +193,43 @@ ggplot(countryImmViews2022, aes(x = unemployed, y = overallAttitude, label=code)
 # plot attendance 
 
 # more attendance, more job priority for citizens
-ggplot(countryImmViews2022, aes(x = attend, y = jobPri, label=code)) +
+ggplot(countryData2022, aes(x = attend, y = jobPri, label=code)) +
   geom_point(col="blue",alpha=0.5)+geom_text(hjust=-0.1,vjust=-0.1)+
   labs(x = 'Religious Attendance', y = "Job Equality")+
   geom_smooth(method = "lm")
 
 # more attendance, slightly less acceptance of immigrant neighbors
-ggplot(countryImmViews2022, aes(x = attend, y = nbr, label=code)) +
+ggplot(countryData2022, aes(x = attend, y = nbr, label=code)) +
   geom_point(col="blue",alpha=0.5)+geom_text(hjust=-0.1,vjust=-0.1)+
   labs(x = 'Religious Attendance', y = "Acceptance of Immigrant Neighbors")+
   geom_smooth(method = "lm")
 
 # straight line
-ggplot(countryImmViews2022, aes(x = attend, y = policy, label=code)) +
+ggplot(countryData2022, aes(x = attend, y = policy, label=code)) +
   geom_point(col="blue",alpha=0.5)+geom_text(hjust=-0.1,vjust=-0.1)+
   labs(x = 'Religious Attendance', y = "Flexibility of Immigration Policy")+
   geom_smooth(method = "lm")
 
 # more attendance, more belief in immigrants affecting crime
-ggplot(countryImmViews2022, aes(x = attend, y = crime, label=code)) +
+ggplot(countryData2022, aes(x = attend, y = crime, label=code)) +
   geom_point(col="blue",alpha=0.5)+geom_text(hjust=-0.1,vjust=-0.1)+
   labs(x = 'Religious Attendance', y = "Belief in Immigrants Not Increasing Crime")+
   geom_smooth(method = "lm")
 
 # more attendance, more belief in immigrants taking away jobs
-ggplot(countryImmViews2022, aes(x = attend, y = lessJobs, label=code)) +
+ggplot(countryData2022, aes(x = attend, y = lessJobs, label=code)) +
   geom_point(col="blue",alpha=0.5)+geom_text(hjust=-0.1,vjust=-0.1)+
   labs(x = 'Religious Attendance', y = "Immigrants Do Not Take Away Jobs")+
   geom_smooth(method = "lm")
 
 # more attendance, more belief in immigrants being a welfare strain
-ggplot(countryImmViews2022, aes(x = attend, y = welfareStrain, label=code)) +
+ggplot(countryData2022, aes(x = attend, y = welfareStrain, label=code)) +
   geom_point(col="blue",alpha=0.5)+geom_text(hjust=-0.1,vjust=-0.1)+
   labs(x = 'Religious Attendance', y = "Immigrants are not a welfare strain")+
   geom_smooth(method = "lm")
 
 # more attendance, less belief in immigrants having a positive impact 
-ggplot(countryImmViews2022, aes(x = attend, y = posImpact, label=code)) +
+ggplot(countryData2022, aes(x = attend, y = posImpact, label=code)) +
   geom_point(col="blue",alpha=0.5)+geom_text(hjust=-0.1,vjust=-0.1)+
   labs(x = 'Religious Attendance', y = "Immigrants have a positive impact")+
   geom_smooth(method = "lm")
@@ -238,86 +238,86 @@ ggplot(countryImmViews2022, aes(x = attend, y = posImpact, label=code)) +
 # gdp per capita
 
 # increase in gdp per capita, increase in belief that there should be no job priority
-ggplot(countryImmViews2022, aes(x = lgdppc, y = jobPri, label=code)) +
+ggplot(countryData2022, aes(x = lgdppc, y = jobPri, label=code)) +
   geom_point(col="blue",alpha=0.5) + geom_text(hjust=-0.1,vjust=-0.1) +
   labs(x = 'GDP per Capita', y = "Job Equality") +
   geom_smooth(method = "lm")
 
 # increase in gdp per capita, increase in acceptance of immigrant neighbors
-ggplot(countryImmViews2022, aes(x = lgdppc, y = nbr, label=code)) +
+ggplot(countryData2022, aes(x = lgdppc, y = nbr, label=code)) +
   geom_point(col="blue",alpha=0.5) + geom_text(hjust=-0.1,vjust=-0.1) +
   labs(x = 'GDP per Capita', y = "Acceptance of Immigrant Neighbors") +
   geom_smooth(method = "lm")
 
 # increase in gdp per capita, decrease in flexibility of immigration policy
-ggplot(countryImmViews2022, aes(x = lgdppc, y = policy, label=code)) +
+ggplot(countryData2022, aes(x = lgdppc, y = policy, label=code)) +
   geom_point(col="blue",alpha=0.5) + geom_text(hjust=-0.1,vjust=-0.1) +
   labs(x = 'GDP per Capita', y = "Flexibility of Immigration Policy") +
   geom_smooth(method = "lm")
 
 # increase in gdp per capita, increase in belief of immigrants causing crime
-ggplot(countryImmViews2022, aes(x = lgdppc, y = crime, label=code)) +
+ggplot(countryData2022, aes(x = lgdppc, y = crime, label=code)) +
   geom_point(col="blue",alpha=0.5) + geom_text(hjust=-0.1,vjust=-0.1) +
   labs(x = 'GDP per Capita', y = "Belief in Immigrants Not Increasing Crime") +
   geom_smooth(method = "lm")
 
 # increase in gdp per capita, immigrants don't take away jobs
-ggplot(countryImmViews2022, aes(x = lgdppc, y = lessJobs, label=code)) +
+ggplot(countryData2022, aes(x = lgdppc, y = lessJobs, label=code)) +
   geom_point(col="blue",alpha=0.5) + geom_text(hjust=-0.1,vjust=-0.1) +
   labs(x = 'GDP per Capita', y = "Immigrants Do Not Take Away Jobs") +
   geom_smooth(method = "lm")
 
 # increase in gdp per capita, belief in immigrants being a welfare strain
-ggplot(countryImmViews2022, aes(x = lgdppc, y = welfareStrain, label=code)) +
+ggplot(countryData2022, aes(x = lgdppc, y = welfareStrain, label=code)) +
   geom_point(col="blue",alpha=0.5) + geom_text(hjust=-0.1,vjust=-0.1) +
   labs(x = 'GDP per Capita', y = "Immigrants are not a welfare strain") +
   geom_smooth(method = "lm")
 
 # increase in gdp per capita, increase in belief of immigrants with a positive impact
-ggplot(countryImmViews2022, aes(x = lgdppc, y = posImpact, label=code)) +
+ggplot(countryData2022, aes(x = lgdppc, y = posImpact, label=code)) +
   geom_point(col="blue",alpha=0.5) + geom_text(hjust=-0.1,vjust=-0.1) +
   labs(x = 'GDP per Capita', y = "Immigrants have a positive impact") +
   geom_smooth(method = "lm")
 
 # religious person
 # more religious, more job priority
-ggplot(countryImmViews2022, aes(x = binaryReliPerson, y = jobPri, label=code)) +
+ggplot(countryData2022, aes(x = binaryReliPerson, y = jobPri, label=code)) +
   geom_point(col="blue",alpha=0.5) + geom_text(hjust=-0.1,vjust=-0.1) +
   labs(x = '% IDing as "religious person', y = "Job Equality") +
   geom_smooth(method = "lm")
 
 # no correlation
-ggplot(countryImmViews2022, aes(x = binaryReliPerson, y = nbr, label=code)) +
+ggplot(countryData2022, aes(x = binaryReliPerson, y = nbr, label=code)) +
   geom_point(col="blue",alpha=0.5) + geom_text(hjust=-0.1,vjust=-0.1) +
   labs(x = '% IDing as "religious person', y = "Acceptance of Immigrant Neighbors") +
   geom_smooth(method = "lm")
 
 # no correlation
-ggplot(countryImmViews2022, aes(x = binaryReliPerson, y = policy, label=code)) +
+ggplot(countryData2022, aes(x = binaryReliPerson, y = policy, label=code)) +
   geom_point(col="blue",alpha=0.5) + geom_text(hjust=-0.1,vjust=-0.1) +
   labs(x = '% IDing as "religious person', y = "Flexibility of Immigration Policy") +
   geom_smooth(method = "lm")
 
 # more religious, more belief in immigrants not increasing crime
-ggplot(countryImmViews2022, aes(x = binaryReliPerson, y = crime, label=code)) +
+ggplot(countryData2022, aes(x = binaryReliPerson, y = crime, label=code)) +
   geom_point(col="blue",alpha=0.5) + geom_text(hjust=-0.1,vjust=-0.1) +
   labs(x = '% IDing as "religious person', y = "Belief in Immigrants Not Increasing Crime") +
   geom_smooth(method = "lm")
 
 # more religious, more belief in immigrants taking away jobs
-ggplot(countryImmViews2022, aes(x = binaryReliPerson, y = lessJobs, label=code)) +
+ggplot(countryData2022, aes(x = binaryReliPerson, y = lessJobs, label=code)) +
   geom_point(col="blue",alpha=0.5) + geom_text(hjust=-0.1,vjust=-0.1) +
   labs(x = '% IDing as "religious person', y = "Immigrants Do Not Take Away Jobs") +
   geom_smooth(method = "lm")
 
 # more religious, more belief in immigrants not being a welfare strain
-ggplot(countryImmViews2022, aes(x = binaryReliPerson, y = welfareStrain, label=code)) +
+ggplot(countryData2022, aes(x = binaryReliPerson, y = welfareStrain, label=code)) +
   geom_point(col="blue",alpha=0.5) + geom_text(hjust=-0.1,vjust=-0.1) +
   labs(x = '% IDing as "religious person', y = "Immigrants are not a welfare strain") +
   geom_smooth(method = "lm")
 
 # more religious, less belief in immigrants having a positive impact
-ggplot(countryImmViews2022, aes(x = binaryReliPerson, y = posImpact, label=code)) +
+ggplot(countryData2022, aes(x = binaryReliPerson, y = posImpact, label=code)) +
   geom_point(col="blue",alpha=0.5) + geom_text(hjust=-0.1,vjust=-0.1) +
   labs(x = '% IDing as "religious person', y = "Immigrants have a positive impact") +
   geom_smooth(method = "lm")
@@ -326,43 +326,43 @@ ggplot(countryImmViews2022, aes(x = binaryReliPerson, y = posImpact, label=code)
 # satisfaction with financial situation
 
 # increase in satisfaction, increase in no job priority
-ggplot(countryImmViews2022, aes(x = satisfied, y = jobPri, label=code)) +
+ggplot(countryData2022, aes(x = satisfied, y = jobPri, label=code)) +
   geom_point(col="blue",alpha=0.5) + geom_text(hjust=-0.1,vjust=-0.1) +
   labs(x = 'Satisfaction with Financial Situation', y = "Job Equality") +
   geom_smooth(method = "lm")
 
 # not much correlation
-ggplot(countryImmViews2022, aes(x = satisfied, y = nbr, label=code)) +
+ggplot(countryData2022, aes(x = satisfied, y = nbr, label=code)) +
   geom_point(col="blue",alpha=0.5) + geom_text(hjust=-0.1,vjust=-0.1) +
   labs(x = 'Satisfaction with Financial Situation', y = "Acceptance of Immigrant Neighbors") +
   geom_smooth(method = "lm")
 
 # increase in x, associated with decrease in flexibility of policy
-ggplot(countryImmViews2022, aes(x = satisfied, y = policy, label=code)) +
+ggplot(countryData2022, aes(x = satisfied, y = policy, label=code)) +
   geom_point(col="blue",alpha=0.5) + geom_text(hjust=-0.1,vjust=-0.1) +
   labs(x = 'Satisfaction with Financial Situation', y = "Flexibility of Immigration Policy") +
   geom_smooth(method = "lm")
 
 # increase in satisfaction, more belief in immigrants causing crime
-ggplot(countryImmViews2022, aes(x = satisfied, y = crime, label=code)) +
+ggplot(countryData2022, aes(x = satisfied, y = crime, label=code)) +
   geom_point(col="blue",alpha=0.5) + geom_text(hjust=-0.1,vjust=-0.1) +
   labs(x = 'Satisfaction with Financial Situation', y = "Belief in Immigrants Not Increasing Crime") +
   geom_smooth(method = "lm")
 
 # increase in satisfaction, more belief in immigrants not taking away jobs
-ggplot(countryImmViews2022, aes(x = satisfied, y = lessJobs, label=code)) +
+ggplot(countryData2022, aes(x = satisfied, y = lessJobs, label=code)) +
   geom_point(col="blue",alpha=0.5) + geom_text(hjust=-0.1,vjust=-0.1) +
   labs(x = 'Satisfaction with Financial Situation', y = "Immigrants Do Not Take Away Jobs") +
   geom_smooth(method = "lm")
 
 # increase in financial satisfaction, belief immigrants are a welfare strain
-ggplot(countryImmViews2022, aes(x = satisfied, y = welfareStrain, label=code)) +
+ggplot(countryData2022, aes(x = satisfied, y = welfareStrain, label=code)) +
   geom_point(col="blue",alpha=0.5) + geom_text(hjust=-0.1,vjust=-0.1) +
   labs(x = 'Satisfaction with Financial Situation', y = "Immigrants are not a welfare strain") +
   geom_smooth(method = "lm")
 
 # increase in financial satisfaction, greater belief immigrants have a positive impact
-ggplot(countryImmViews2022, aes(x = satisfied, y = posImpact, label=code)) +
+ggplot(countryData2022, aes(x = satisfied, y = posImpact, label=code)) +
   geom_point(col="blue",alpha=0.5) + geom_text(hjust=-0.1,vjust=-0.1) +
   labs(x = 'Satisfaction with Financial Situation', y = "Immigrants have a positive impact") +
   geom_smooth(method = "lm")
@@ -370,42 +370,42 @@ ggplot(countryImmViews2022, aes(x = satisfied, y = posImpact, label=code)) +
 
 # unemployment
 # increase in job priority beliefs
-ggplot(countryImmViews2022, aes(x = unemployed, y = jobPri, label=code)) +
+ggplot(countryData2022, aes(x = unemployed, y = jobPri, label=code)) +
   geom_point(col="blue",alpha=0.5) + geom_text(hjust=-0.1,vjust=-0.1) +
   labs(x = 'Unemployment', y = "Job Equality") +
   geom_smooth(method = "lm")
 
 # no correlation really
-ggplot(countryImmViews2022, aes(x = unemployed, y = nbr, label=code)) +
+ggplot(countryData2022, aes(x = unemployed, y = nbr, label=code)) +
   geom_point(col="blue",alpha=0.5) + geom_text(hjust=-0.1,vjust=-0.1) +
   labs(x = 'Unemployment', y = "Acceptance of Immigrant Neighbors") +
   geom_smooth(method = "lm")
 
 # slight increase in flexibility of immigration policy
-ggplot(countryImmViews2022, aes(x = unemployed, y = policy, label=code)) +
+ggplot(countryData2022, aes(x = unemployed, y = policy, label=code)) +
   geom_point(col="blue",alpha=0.5) + geom_text(hjust=-0.1,vjust=-0.1) +
   labs(x = 'Unemployment', y = "Flexibility of Immigration Policy") +
   geom_smooth(method = "lm")
 
 # less belief in immigrants increasing crime
-ggplot(countryImmViews2022, aes(x = unemployed, y = crime, label=code)) +
+ggplot(countryData2022, aes(x = unemployed, y = crime, label=code)) +
   geom_point(col="blue",alpha=0.5) + geom_text(hjust=-0.1,vjust=-0.1) +
   labs(x = 'Unemployment', y = "Belief in Immigrants Not Increasing Crime") +
   geom_smooth(method = "lm")
 
 # surprisingly flat
-ggplot(countryImmViews2022, aes(x = unemployed, y = lessJobs, label=code)) +
+ggplot(countryData2022, aes(x = unemployed, y = lessJobs, label=code)) +
   geom_point(col="blue",alpha=0.5) + geom_text(hjust=-0.1,vjust=-0.1) +
   labs(x = 'Unemployment', y = "Immigrants Do Not Take Away Jobs") +
   geom_smooth(method = "lm")
 
-ggplot(countryImmViews2022, aes(x = unemployed, y = welfareStrain, label=code)) +
+ggplot(countryData2022, aes(x = unemployed, y = welfareStrain, label=code)) +
   geom_point(col="blue",alpha=0.5) + geom_text(hjust=-0.1,vjust=-0.1) +
   labs(x = 'Unemployment', y = "Immigrants are not a welfare strain") +
   geom_smooth(method = "lm")
 
 # immigrants are nto a welfare straing
-ggplot(countryImmViews2022, aes(x = unemployed, y = posImpact, label=code)) +
+ggplot(countryData2022, aes(x = unemployed, y = posImpact, label=code)) +
   geom_point(col="blue",alpha=0.5) + geom_text(hjust=-0.1,vjust=-0.1) +
   labs(x = 'Unemployment', y = "Immigrants have a positive impact") +
   geom_smooth(method = "lm")
