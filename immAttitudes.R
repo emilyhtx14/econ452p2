@@ -73,8 +73,23 @@ attributes(ivs$C006)
 # increasing in satisfaction with household's financial situation
 
 # Select the desired columns from the 'ivs' data
-ivsSmall <- ivs[,c("S003", "S020", "A124_06","C002","E143","G038","G040", "G041", "G052", "F034", "F028", "C006", "unemployed")]
-colnames(ivsSmall)<-c("code", "year","nbr","jobPri","policy","lessJobs","crime", "welfareStrain", "posImpact", "reliPerson", "attend", "satisfied", "unemployed")
+ivsSmall <- ivs[,c("S003", "S020", "A124_06","C002","E143","X025","G026","G027","G027A", "G038","G040", "G041", "G052", "F034", "F028", "C006", "F025", "unemployed")]
+colnames(ivsSmall)<-c("code", "year","nbr","jobPri","policy", "education","momimm", "dadimm", "resimm", "lessJobs","crime", "welfareStrain", "posImpact", "reliPerson", "attend", "satisfied", "denomination", "unemployed")
+
+# Create a new variable 'immigrant_family' based on conditions
+ivsSmall$immigrant_family <- ifelse(ivsSmall$momimm == 1 | ivsSmall$dadimm == 1 | ivsSmall$resimm == 1, 1, 0)
+
+ivsSmall$bachelors <- ifelse(ivsSmall$education>5, 1, 0)
+
+#religious dummy variables
+ivsSmall$no_denomation <- as.numeric(ivsSmall$denomination==0)
+ivsSmall$catholic <- as.numeric(ivsSmall$denomination==1)
+ivsSmall$protestant <- as.numeric(ivsSmall$denomination==2)
+ivsSmall$orthodox <- as.numeric(ivsSmall$denomination==3)
+ivsSmall$jew <- as.numeric(ivsSmall$denomination==4)
+ivsSmall$muslim <- as.numeric(ivsSmall$denomination==5)
+ivsSmall$hindu <- as.numeric(ivsSmall$denomination==6)
+ivsSmall$buddhist <- as.numeric(ivsSmall$denomination==7)
 
 # religious person variable
 ivsSmall$binaryReliPerson <- ifelse(ivsSmall$reliPerson == 1, 1, 0)
@@ -134,8 +149,17 @@ countryData <- ivsSmall %>% group_by(code) %>%
             binaryReliPerson = mean(binaryReliPerson, na.rm = TRUE),
             attend = mean(attend, na.rm = TRUE),
             satisfied = mean(satisfied, na.rm = TRUE),
-            unemployed = mean(unemployed, na.rm = TRUE)
-  )
+            unemployed = mean(unemployed, na.rm = TRUE),
+            immigrant_family = mean(immigrant_family, na.rm = TRUE),
+            bachelors = mean(bachelors, na.rm = TRUE),
+            no_denomination = mean(no_denomation, na.rm = TRUE),
+            catholic = mean(catholic, na.rm = TRUE),
+            protestant = mean(protestant, na.rm = TRUE),
+            orthodox = mean(orthodox, na.rm = TRUE),
+            jew = mean(jew, na.rm = TRUE),
+            muslim = mean(muslim, na.rm = TRUE),
+            hindu = mean(hindu, na.rm = TRUE),
+            buddhist = mean(buddhist, na.rm = TRUE))
 
 countryData <- countryData %>%
   mutate(overallAttitude = rowMeans(select(., nbr, jobPri, policy, lessJobs, crime, welfareStrain, posImpact), na.rm = TRUE))
@@ -187,6 +211,17 @@ ggplot(countryData2022, aes(x = unemployed, y = overallAttitude, label=code)) +
   geom_point(col="blue",alpha=0.5)+geom_text(hjust=-0.1,vjust=-0.1)+
   labs(x = 'Unemployed', y = "Overall Attitude")+
   geom_smooth(method = "lm")
+
+# Multiple regression model
+model_multiple <- lm(overallAttitude ~ lgdppc+binaryReliPerson+attend+satisfied+unemployed, data = countryData2022)
+
+# Summary of the regression model
+summary(model_multiple)
+
+stargazer(model_multiple, type = "text")
+
+model_attitude<-lm(overallAttitude~attend+lgdppc+binaryReliPerson+satisfied+unemployed+immigrant_family+bachelors+no_denomination+catholic+protestant+orthodox+jew+muslim+hindu+buddhist, data=countryData2022)
+stargazer(model_attitude, type = "text")
 
 ### plot individual variables in index ###
 
@@ -409,5 +444,27 @@ ggplot(countryData2022, aes(x = unemployed, y = posImpact, label=code)) +
   geom_point(col="blue",alpha=0.5) + geom_text(hjust=-0.1,vjust=-0.1) +
   labs(x = 'Unemployment', y = "Immigrants have a positive impact") +
   geom_smooth(method = "lm")
+
+#regressions
+model_jobPri<-lm(jobPri~attend+lgdppc+binaryReliPerson+satisfied+unemployed+immigrant_family+bachelors+no_denomination+catholic+protestant+orthodox+jew+muslim+hindu+buddhist, data=countryData2022)
+model_nbr<-lm(nbr~attend+lgdppc+binaryReliPerson+satisfied+unemployed+immigrant_family+bachelors+no_denomination+catholic+protestant+orthodox+jew+muslim+hindu+buddhist, data=countryData2022)
+model_policy<-lm(policy~attend+lgdppc+binaryReliPerson+satisfied+unemployed+immigrant_family+bachelors+no_denomination+catholic+protestant+orthodox+jew+muslim+hindu+buddhist, data=countryData2022)
+model_crime<-lm(crime~attend+lgdppc+binaryReliPerson+satisfied+unemployed+immigrant_family+bachelors+no_denomination+catholic+protestant+orthodox+jew+muslim+hindu+buddhist, data=countryData2022)
+model_lessJobs<-lm(lessJobs~attend+lgdppc+binaryReliPerson+satisfied+unemployed+immigrant_family+bachelors+no_denomination+catholic+protestant+orthodox+jew+muslim+hindu+buddhist, data=countryData2022)
+model_welfareStrain<-lm(welfareStrain~attend+lgdppc+binaryReliPerson+satisfied+unemployed+immigrant_family+bachelors+no_denomination+catholic+protestant+orthodox+jew+muslim+hindu+buddhist, data=countryData2022)
+model_posImpact<-lm(posImpact~attend+lgdppc+binaryReliPerson+satisfied+unemployed+immigrant_family+bachelors+no_denomination+catholic+protestant+orthodox+jew+muslim+hindu+buddhist, data=countryData2022)
+
+models_list <- list(
+  model_jobPri,
+  model_nbr,
+  model_policy,
+  model_crime,
+  model_lessJobs,
+  model_welfareStrain,
+  model_posImpact
+)
+
+# Create stargazer table
+stargazer(models_list, type = "text")
 
 
