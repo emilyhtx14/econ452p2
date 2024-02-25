@@ -141,7 +141,6 @@ countryImmViews <- ivsSmall %>% group_by(code) %>%
 countryImmViews <- countryImmViews %>%
   mutate(overallAttitude = rowMeans(select(., nbr, jobPri, policy, lessJobs, crime, welfareStrain, posImpact), na.rm = TRUE))
 
-
 countryImmViews[countryImmViews == "NaN"] <- NA
 
 length(unique(countryImmViews$code))
